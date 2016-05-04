@@ -7,7 +7,7 @@ Processing large graphs to solve real world computing problems have already been
 \subsection{Example 1: Dangling Edge}
 \label{subsec:example1}
 
-The first motivating example shown in Figure ~\ref{fig:dEdge} shows an simple compute function that executes at the vertex level. It is obvious from the code that the compute function runs for two supersteps which are analogous to the superstep of BSP model \cite{Valiant1990}. In the first superstep, it removes one vertex providing the vertex identifier to be removed depending on a specific condition. If the condition is false the compute function initiates edge insertion request for a given source and destination vertex identifier. In the final superstep, all vertices simply votes to halt.
+The first motivating example shown in Figure \ref{fig:dEdge} shows an simple compute function that executes at the vertex level. It is obvious from the code that the compute function runs for two supersteps which are analogous to the superstep of BSP model \cite{Valiant1990}. In the first superstep, it removes one vertex providing the vertex identifier to be removed depending on a specific condition. If the condition is false the compute function initiates edge insertion request for a given source and destination vertex identifier. In the final superstep, all vertices simply votes to halt.
 
 \begin{figure}[h]
 \begin{center}
@@ -34,14 +34,14 @@ The first motivating example shown in Figure ~\ref{fig:dEdge} shows an simple co
 
 This compute function on lines 4-13 is running at each active vertex and the behavior of the first superstep depends on the condition provided in the function itself. To specify the possibility of conflicts due to topology mutation involved in the computation function at the vertex level, we need to provide an upper bound for each compute at its respective vertex that conservatively cover all likely conflict effects.
 
-A typical type system may disallow the concurrent execution of all or most of the compute functions, because their broadly specified static mutation effects may conflict. However such conflict may not always occur depending on the dynamic piece of code running at the superstep level. To illustrate with Figure ~\ref{fig:dEdge}, consider there are three active vertices at the superstep 0 and identified by 0, 1 and 2 respectively. Vertex 2 removes itself in superstep 0 and vertex 0 and 1 both tries to add an edge between itself and vertex 2 in the same superstep. The partial ordering mentioned before does not solve cases like this as removal happens before addition. This results in producing a dangling edge and an erroneous graph at superstep 0. Therefore it is clear that the conflict happens at runtime for this interesting example. This indicates the neccessity of running the vertex programs sequentially. If such a conflict does not arise then concurrent execution of vertex programs should be allowed without missing the safe concurrency opportunity. 
+A typical type system may disallow the concurrent execution of all or most of the compute functions, because their broadly specified static mutation effects may conflict. However such conflict may not always occur depending on the dynamic piece of code running at the superstep level. To illustrate with Figure \ref{fig:dEdge}, consider there are three active vertices at the superstep 0 and identified by 0, 1 and 2 respectively. Vertex 2 removes itself in superstep 0 and vertex 0 and 1 both tries to add an edge between itself and vertex 2 in the same superstep. The partial ordering mentioned before does not solve cases like this as removal happens before addition. This results in producing a dangling edge and an erroneous graph at superstep 0. Therefore it is clear that the conflict happens at runtime for this interesting example. This indicates the neccessity of running the vertex programs sequentially. If such a conflict does not arise then concurrent execution of vertex programs should be allowed without missing the safe concurrency opportunity. 
 
 
 
 \subsection{Example 2: Vertex Insertion Ambiguity}
 \label{subsec:example2}
 
-The second example we demonstrate another compute function running at each active vertex given a specific superstep. It is crucial to note that the values associated with the vertex and its edges are the only per-vertex state that persists across supersteps \cite{Pregel2010}. This indicates although identifiers of vertices are unique to itself, values are mutable. In Figure ~\ref{fig:vInsert} each vertex running the compute function on lines 4-12 issues a vertex insertion request with a specific value at first superstep. Final superstep is again naive in a sense as all vertices simply vote to halt in this.
+The second example we demonstrate another compute function running at each active vertex given a specific superstep. It is crucial to note that the values associated with the vertex and its edges are the only per-vertex state that persists across supersteps \cite{Pregel2010}. This indicates although identifiers of vertices are unique to itself, values are mutable. In Figure \ref{fig:vInsert} each vertex running the compute function on lines 4-12 issues a vertex insertion request with a specific value at first superstep. Final superstep is again naive in a sense as all vertices simply vote to halt in this.
 
 
 \begin{figure}[h]
@@ -66,7 +66,7 @@ The second example we demonstrate another compute function running at each activ
 \end{figure}
 
 
-In this example we concentrate once more on a scenario where another type of conflict occurs to motivate the importance of detecting such cases rather than presenting with a safe concurrent program. To illustrate with Figure ~\ref{fig:vInsert}, consider there are three active vertices at the superstep 0 and identified by 0, 1 and 2 respectively. All vertices (vertex 0, 1 and 2) issues a vertex addition request with the same identifier 3, but associates a different value along with it. As identifiers are unique only one request will be considered. However this creates a conflict and can produce non-deterministic result which may or may not be what user intended. 
+In this example we concentrate once more on a scenario where another type of conflict occurs to motivate the importance of detecting such cases rather than presenting with a safe concurrent program. To illustrate with Figure \ref{fig:vInsert}, consider there are three active vertices at the superstep 0 and identified by 0, 1 and 2 respectively. All vertices (vertex 0, 1 and 2) issues a vertex addition request with the same identifier 3, but associates a different value along with it. As identifiers are unique only one request will be considered. However this creates a conflict and can produce non-deterministic result which may or may not be what user intended. 
 
 
 
