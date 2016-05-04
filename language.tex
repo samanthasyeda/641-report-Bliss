@@ -4,16 +4,49 @@
 % is the given name of the calculus and Y is the main new idea in the calculus.
 
 
-{\bf TODO: Present syntax here, and description of syntax that mostly 
-focuses on new and interesting elements.}
+The language we focus on is a core expression language, that captures the essential features of an exisitng programming language. The syntax for this language shown in Figure \ref{fig-syntax} is standard except for mutation expressions to feature graph toplogy mutation and some communication expressions to enable message passing, deactivating vertices and synchronizing supersteps.
 
-% NOTE: treat this figure as an example. Feel free to improve, if needed.
+
+The language introduces four mutation expressions \emph{\textbf{vInsert} e}, \emph{\textbf{vRemove} e}, \emph{\textbf{eInsert} e e} and \emph{\textbf{eRemove} e} to facilicate vertex insertion, vertex deletion, edge insertion and edge deletion respectively. The expression \emph{e} after the keyword \emph{\textbf{vInsert}} is a pair expression itself. The first element of the pair acts as the identifier of the vertex and the second element indicates the value associated with the vertex. To remove a vertex it is sufficient to emit the identifier only. Hence in \emph{\textbf{vRemove} e} expression \emph{e} signifies the identifier. Next mutation expression we introduce is \emph{\textbf{eInsert} e e} where the first \emph{e} is a pair expression and first and second element of the pair indicates the source and destination vertex where the edge will be associated between. The second \emph{e} is a value expression stating a value for the edge. Finally \emph{\textbf{eRemove} e} denotes the edge deletion where the \emph{e} is once more a pair noting the source and destination vertex to mark the edge to be deleted.
+
+
+The language also presents three expreesions to model BSP in order to allow parallel computation. First \emph{\textbf{sync}} expression signifies the synchronization state of the current superstep. It permits sending message between vertices and it is guaranteed that after completion of the current superstep the vertices get all the messages, although order of receiving the message is not assured \cite{Pregel2010}. The \emph{\textbf{send} x e} expression initiates sending the message \emph{e} to destination vertex \emph{x}. After a vertex completes it's computation it can vote to halt, i.e. deactivate itself. This is acheived by \emph{\textbf{halt}} expression.
+
+
 \begin{figure}[t]
 \begin{center}
 $\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
-e &  ::= & b \mid x & \emph{expressions} \\
-&\ \ \ \   \mid & \lambda x:T.e \\
-&\ \ \ \   \mid & \textbf{let}~x=e~\textbf{in}~e \\
+P &  ::= & \overline e & \emph{Expression} \\
+
+\newline
+\newline
+
+
+e &  ::= & x & \emph{Variable} \\
+&\ \ \ \   \mid & x:=e & \emph{Assignment} \\
+&\ \ \ \   \mid & (e~e) & \emph{Pair} \\
+&\ \ \ \   \mid & \lambda x:T.e & \emph{Lambda} \\
+&\ \ \ \   \mid & e~e & \emph{Application} \\
+&\ \ \ \   \mid & \textbf{if}~x~\textbf{then}~e~\textbf{else}~e  & \emph{Conditional} \\
+&\ \ \ \   \mid & \textbf{while}~x~\textbf{do}~e  & \emph{While} \\
+&\ \ \ \   \mid & \textbf{vInsert}~e  & \emph{Vertex Insert} \\
+&\ \ \ \   \mid & \textbf{vRemove}~e  & \emph{Vertex Remove} \\
+&\ \ \ \   \mid & \textbf{eInsert}~e~e  & \emph{Edge Insert} \\
+&\ \ \ \   \mid & \textbf{eRemove}~e  & \emph{Edge Remove} \\
+&\ \ \ \   \mid & \textbf{sync} & \emph{Superstep Barrier Synchronization} \\
+&\ \ \ \   \mid & \textbf{send}~x~e & \emph{Send message e to Vertex x} \\
+&\ \ \ \   \mid & \textbf{halt} & \emph{Vote to Halt} \\
+
+
+\newline
+\newline
+
+
+v &  ::= & v,~v  & \emph{Pair Value} \\
+&\ \ \ \   \mid & i & \emph{Integer Value} \\
+&\ \ \ \   \mid & b & \emph{boolean Value} \\
+&\ \ \ \   \mid & i & \emph{Integer Value} \\
+&\ \ \ \   \mid & (x:T) \Rightarrow e & \emph{Function Value} \\
 \end{array}
 $
 \end{center}
@@ -21,6 +54,3 @@ $
 $\overline{\bullet}$ represents a set of $\bullet$ elements).}
 \label{fig-syntax}
 \end{figure}
-
-
-
