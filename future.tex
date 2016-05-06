@@ -1,0 +1,29 @@
+\section{Future Work}
+The future work on our proposed type system will focus on the improvement of the
+completeness of the type checking, and increasing the range of problems that can
+be solved.
+
+\subsection{Completeness Improvement}
+Our type system identify dependency of variables, by tracking the set of
+variables the value of a variable depends on. Currently, we
+assume that variables with the same set of dependency will have the same value,
+while other cases are left until run-time to check using the run-time value. In
+many cases, the value of the variable can be determined more precisely.
+Another promising direction is to use the means of symbolic
+execution~\cite{king1976}, where we can determine the range of vertex and edge
+values that can cause confliction of mutation.
+
+\subsection{Further Expanding the Solution}
+The current type system solves a class of problems of concurrent graph mutation,
+where concurrent mutation requests can conflict with each other causing
+indeterministic results or ill-formed graphs, as described in \secref{sec:motivation}. 
+
+There are other classes of problems raised by concurrent execution of graph
+mutation that is not covered by the solution proposed in this work. Consider an
+algorithm where edges are added to vertices only if the out degree of a vertex
+is smaller than n. Multiple attempt to add edges to a same vertex from
+different vertex can be issued in the same superstep. Even though the mutation
+request does not conflict with each other, the resulting graph can violate the
+desired graph property. These class of problems might be able to be solved by
+expanding the expressiveness of the language to specify desired graph
+properties. 
