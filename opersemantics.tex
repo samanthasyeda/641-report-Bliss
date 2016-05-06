@@ -1,6 +1,258 @@
-\section{Dynamic Semantcs}
+\section{Dynamic Semantics}
 \label{sec:semantics}
 
-{\bf TODO: present the domain, and the operational semantics rules here, 
-and description of these rules that focuses on the new and interesting rules.}
+The dynamic part of the core language has been encoded through dynamic semantics. It verifies the disjointness check rule using runtime checks that could not be verified statically for any type of mutation expressions.
+
+\subsection{Dynamic Semantics Objects}
+\label{subsec:dom}
+
+The dynamic semantics of the core language introduces two configurations: global and local. A global configuration $K$ = <G, M, Q, S, $\Sigma$>, shown in Figure \ref{fig-domEv}, consists of a graph G, a message queue M, a mutation queue Q, a set of vertices mapping S indicating the active or non-active state and a local configuration $\Sigma$ for each vertex in G. The graph G consists of set of vertices V and set of edges E. The local configuration  can be empty for a vertex or can be of the form <$\mathscr{E}$, id> denoting the local evaluation and identifier of the precise vertex. The message queue M maps a vertex with a message. The mutation queue Q can be empty or consist of mutation(s) to transform the graph. Dynamic semantic rules in this report are shown using a one-step reduction relation and a set of evalutation contexts $\mathscr{E}$ which specify the evalutation order. 
+
+\begin{figure}[h]
+
+\textbf{Domains:}\\
+\begin{center}
+
+$\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
+  K & ::= & <G,~M,~Q,~S,~\Sigma> & \hspace{15mm} \emph{"Global Configurations"} \\
+  \Sigma & ::= & \bullet~\mid~<\mathscr{E}, id>  & \hspace{15mm} \emph{"Local Configurations"} \\
+  G & ::= & <V,~E> & \hspace{30mm} \emph{"Graph"}\\
+  M & ::= & \{~id \mapsto m~\}  & \hspace{15mm}  \emph{"Message Queue"}\\
+  m & ::= & \bullet~\mid~\mathscr{E}.m & \hspace{15mm}  \emph{"State of Mutation"}\\
+  Q & ::= & \bullet~\mid~\mathscr{E}.Q  & \hspace{15mm}  \emph{"Mutation Queue"} \\
+  S & ::= & \{~v_k \mapsto \{true, false\}~\}  & \hspace{15mm}  \emph{"List of Verices"}\\
+\end{array}
+$
+\end{center}
+
+$\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
+\ \\
+\ \\
+\end{array}
+$
+
+
+\textbf{Evaluation contexts:}\\
+\begin{center}
+
+$\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
+ \mathscr{E} &  ::= & \hole~\mid~x:=\mathscr{E}~\mid~\textbf{if}~x~\textbf{then}~\mathscr{E}~\textbf{else}~e~\mid~\textbf{if}~x~\textbf{then}~e~\textbf{else}~\mathscr{E}~\mid~\textbf{while}~x~\textbf{do}~\mathscr{E} \\
+&\ \ \ \   \mid & \textbf{eRemove}~\mathscr{E}~\mid~\textbf{vRemove}~\mathscr{E}~\mid~\textbf{vInsert}~\mathscr{E}~\mid~\textbf{eInsert}~\mathscr{E}~\mid~\textbf{send}~x~\mathscr{E}\\
+\end{array}
+$
+\end{center}
+
+$\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
+\ \\
+\ \\
+\end{array}
+$
+
+\textbf{Evaluation relation:}\\ 
+\begin{center}
+
+$\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
+ \overset{a}{\reducesto}:~\mathscr{E}~\overset{a}{\rightarrow}~\mathscr{E}\\ 
+\end{array}
+$
+\end{center}
+
+
+\caption{Domains and evaluation contexts.}
+\label{fig-domEv}
+\end{figure}
+
+\subsection{Auxiliary Functions}
+\label{subsec:aux}
+
+
+Three auxiliary functions in Figure \ref{fig-auxFunc} have been used in the small step dynamic operational semantics.
+\ \\
+\ \\
+\textbf{next(S, id):} Given a list of vertices \emph{S}, and a vertex identifier \emph{id}, the auxiliary function \emph{next(S, id)} returns the local configuration of the next active vertex. The function returns empty if all vertices are inactive.
+\ \\
+\ \\
+\textbf{pOrder(Q):} Given a list of mutation expressions residing in mutation queue \emph{Q}, auxiliary function \emph{pOrder(Q)} returns \emph{$Q'$} where \emph{$Q'$} is the partial-ordered list of \emph{Q}. Therefore the mutations in \emph{$Q'$} maintains the standard partial order \cite{Pregel2010} such that edge removal and vertex removal mutations are stored respectively and these are followed by vertex insertion and edge insertion mutation types. 
+\ \\
+\ \\
+\textbf{disjoint(m, Q):} The auxiliary function disjoint checks for possiblity of conflicts with respect to the given mutation expression \emph{m} against the existing mutation expressions in the mutation queue \emph{Q}. Vertices with a lower id has priority over mutations on conflicting vertices or edges.
+
+\begin{figure}[h]
+\begin{center}
+\[
+    next(S, id)= 
+\begin{cases}
+    \Sigma(id'), & \text{if } id' \mapsto true \in S\\
+    \bullet,              & \text{otherwise}\\
+\end{cases}
+\]
+
+$\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
+ pOrder(Q) = Q^{'}, where~Q \notin \varnothing
+\end{array}
+$
+$\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
+and~all~mutations~in~Q^{'}~are~ordered~such~that~eRemove \prec vRemove \prec vInsert \prec eInsert\\ 
+\end{array}
+$
+
+$\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
+\\
+\\
+\\
+\end{array}
+$
+$disjoint(m, Q) = \neg($\\
+$(m = \textbf{vInsert}~v~\wedge \exists m' \in Q,~m' = \textbf{vInsert}~v'~\wedge~(v=v')$\\
+$\vee $\\
+$(m = \textbf{eInsert} (v,~v',~t)~\wedge (\exists m' \in Q,~m' = \textbf{vRemove}~v''~\wedge~(v''=v'\vee v'' = v)))$\\
+$\vee $\\
+$(m = \textbf{vRemove}~v~\wedge (\exists m' \in Q,~m' = \textbf{eInsert} (v,~v',~t)~\wedge~(v''=v'\vee v'' = v)))$\\
+$)$
+
+
+\end{center}
+\caption{Auxiliary functions \emph{next}, \emph{pOrder} and \emph{disjoint}.}
+\label{fig-auxFunc}
+\end{figure}
+
+\subsection{Mutation and Communication Semantics}
+\label{subsec:dom}
+
+There are several interesting rules in the language's dynamic semantics other than the existing operational semantics for standard expressions. Some of the rules such as \emph{sync}, \emph{halt}, \emph{send}, local mutation rules represent local operational semantics at each vertex. The language also supports global mutation rules and a global synchronization.\\
+\ \\
+\ \\
+\inferrule[\small {(Sync)}]
+{\Sigma ' = next(S, id)}
+{<G, M, Q, S, \Sigma <\mathscr{E}[sync], id>> \ \ \reducesto \ \ <G, M, Q, S, \Sigma '>}
+
+\smallskip
+
+The rule (SYNC) only changes the local configuration of a vertex that runs the computation function. After the computation running at some local vertex is completed, this rule returns the local configuration indicating vertex is ready to synchronize. 
+\ \\
+\ \\
+\inferrule[\small {(Halt)}]
+{S'(id) = false, \Sigma ' = next(S, id)}
+{<G, M, Q, S, \Sigma <\mathscr{E}[halt], id>> \ \ \reducesto \ \ <G, M, Q, S', \Sigma '>}
+
+\smallskip
+
+The (HALT) rule is similar to synchronization as it also happens once the computation function finishes at the vertex level and it returns the local configuration. But it deviates from the previous rule in a sense as it resets the active status of the vertex in the global list of vertices S that keeps the mapping of active vertices.\\
+\ \\
+\ \\
+\inferrule[\small {(Send)}]
+{M' \in M(x).e}
+{<G, M, Q, S, \Sigma <\mathscr{E}[send\ x\ e], id>> \ \ \reducesto \ \ <G, M', Q, S, \Sigma<\mathscr{E}', id>>}
+
+\smallskip
+
+The vertices in the graph can send message to each other if necessary. The rule (SEND) facilitates this purpose. In this rule configuration evaluates the message \emph{e} to be sent to vertex \emph{x} in local context, and the identifier in the configuration denotes the source vertex. If a vertex receives a message in any superstep then it is considered as active. The global message queue is updated with the new message.\\
+\ \\
+\ \\
+\inferrule[\small {(VInsert)}]
+{
+disjoint(vInsert\ e, Q)\\
+Q'=pOrder(Q.(vInsert\ e))
+}
+{<G, M, Q, S, \Sigma <\mathscr{E}[vInsert\ e], id>> \ \ \reducesto \ \ <G, M, Q', S, \Sigma <\mathscr{E}', id>>}
+
+\smallskip
+
+Our model allows graph transformation operations. When a vertex requests for a certain mutation type the local rule for that precise mutation works.\\
+The rule (VINSERT) signifies the vertex insertion rule which when issued a disjoint check is performed through the auxiliary function \emph{disjoint}. If \emph{disjoint} confirms that the insertion of the new vertex does not conflict with the other mutations stored in the global mutation queue  Q, then it stores the mutation in a location inside the queue such that all mutations are stored maintaining the partial order. This is achieved by the auxiliary function \emph{pOrder} and Q is updated to $Q'$ through this.\\
+\ \\
+\ \\
+\inferrule[\small {(VRemove)}]
+{
+disjoint(vRemove\ e, Q)\\
+Q'=pOrder(Q.(vRemove\ e))
+}
+{<G, M, Q, S, \Sigma <\mathscr{E}[vRemove\ e], id>> \ \ \reducesto \ \ <G, M, Q', S, \Sigma <\mathscr{E}', id>>}
+
+\smallskip
+
+The local rule for vertex removal (VREMOVE) works similarly. It checks for possibility of disjointness through function \emph{disjoint} and if there is no conflict i.e. the new mutation operation is disjoint with respect to other mutation operations stored in Q, then the mutation request is evaluated and Q is updated to $Q'$.\\
+\ \\
+\ \\
+\inferrule[\small {(eInsert)}]
+{
+disjoint(eInsert\ e_1~e_2, Q)\\
+Q'=pOrder(Q.(eInsert\ e_1~e_2))
+}
+{<G, M, Q, S,\Sigma <\mathscr{E}[eInsert\ e_1~e_2], id>> \ \ \reducesto \ \ <G, M, Q', S, \Sigma <\mathscr{E}', id>>}
+
+\smallskip
+
+The edge insertion rule for mutation (EINSERT), resembles the first two rules described as it also checks for disjointness of mutations and updates mutation queue based on it.\\
+The local operational semantics checks for possibility of conflict for three cases: vertex insertion, vertex removal, edge insertion. The reason behind this is evident from motivational example section. It is possible that when mutation requests are issued concurrently from different vertices in same superstep, multiple vertex insertion requests with same identifier but different values can conflict as identifiers are unique to the vertices. Therefore it is only possible to execute only one of such request to avoid conflicts. The (VINSERT) rule takes care of this part. Again it is possible that one vertex is issuing the vertex removal request and another is issuing an add edge request to the vertex to be removed. The partial ordering alone can not handle this, so a disjoint check for both cases through (VREMOVE) and (EINSERT) rules make sure if such a incident occurs then it should not be in the mutation queue.\\
+\ \\ 
+\ \\
+\inferrule[\small {(eRemove)}]
+{
+Q'=pOrder(Q.(eRemove\ e_1~e_2))
+}
+{<G, M, Q, S, \Sigma <\mathscr{E}[eRemove\ e_1~e_2], id>> \ \ \reducesto \ \ <G, M, Q', S, \Sigma <\mathscr{E}', id>>}
+
+\smallskip
+
+Edge removal do not create any type of conflict if issued. Hence it is not necessary to call the auxiliary function \emph{disjoint} for this operation. The (EREMOVE) rule states that mutation queue Q is simply updated to $Q'$ when such a request is issued.\\
+\ \\
+\ \\
+\inferrule[\small {(Global vInsert)}]
+{
+v \notin V \\
+V' = V \cup v
+}
+{<<V, E>, M, \mathscr{E}[vInsert\ v].Q, S, \bullet > \ \ \reducesto \ \ <<V', E>, M, Q, S, \bullet >}
+
+\smallskip
+
+The local dynamic semantics we have presentated takes the mutation expressions and if the mutation in hand does not conflict through the runtime check then it is stored in the mutation queue maitaining partial ordering. Once all vertices have finished computation the global rules take effect. Global rules for graph tranformation work in a sequential manner evaluating the mutations from the global mutation queue Q.\\
+The global rule (GLOBAL VINSERT) simply checks that the vertex \emph{v} to be inserted is not already in the graph and transforms the set of vertices \emph{V} to \emph{$V'$} such that \emph{$V'$ = V $\cup$ v} based on that. The local configuration is empty during the evalutation process of the rule.\\
+\\
+\\
+\inferrule[\small {(Global vRemove)}]
+{
+v \in V \\
+V' = V / v \\
+E' = E/{e \in E,~e=(v_j, v_k),~v_j=v \vee v_k=v}
+}
+{<<V, E>, M, \mathscr{E}[vRemove\ v].Q, S, \bullet > \ \ \reducesto \ \ <<V', E'>, M, Q, S, \bullet >}
+
+\smallskip
+The rule (GLOBAL VREMOVE) is a bit interesting as before the removal of the vertex \emph{v}, it checks for existence of the vertex in the graph, then the request is evaluated in a way the vertex list \emph{V} gets updated to \emph{$V'$} such that \emph{$V'$ = V/v}. And along with the vertex removal incident edge removal takes place as well such that whether the vertex to be removed is a source vertex $v_j$ or a destination vertex $v_k$. This confirms that vertex removal does not result in erreneous graph with dangling edges. Therefore \emph{E} also gets updated to \emph{$E'$}\\
+\ \\
+\ \\
+\inferrule[\small {(Global eInsert)}]
+{
+E' = E \cup e_2
+}
+{<<V, E>, M, \mathscr{E}[eInsert\ e_1~e_2].Q, S, \bullet > \ \ \reducesto \ \ <<V, E'>, M, Q, S, \bullet >}
+
+\smallskip
+In the global edge insertion rule (GLOBAL EINSERT) naively inserts edge between source vertex \emph{$e_1$.fst} and destination vertex \emph{$e_1$.snd}. The list of edges \emph{E} gets updated to \emph{$E'$} such that \emph{$E'$ = E $\cup$ $e_2$}. The local configuration is empty like other global mutation rules.\\
+\ \\
+\ \\
+\inferrule[\small {(Global eRemove)}]
+{
+e_1 \in E \\
+E' = E / e_1
+}
+{<<V, E>, M, \mathscr{E}[eRemove\ e_1~e_2].Q, S, \bullet > \ \ \reducesto \ \ <<V, E'>, M, Q, S, \bullet >}
+
+\smallskip
+The global edge removal rule is straightforward as it just checks the presence of the edge \emph{e} in list of edges \emph{E} and removes the edge during the evaluation of (GLOBAL EREMOVE) rule and updates \emph{$E'$}.\\
+\ \\
+\ \\
+\inferrule[\small {(Global Sync)}]
+{
+Q=\emptyset \\
+S'(id) = (M(id)\neq \emptyset) \\
+\Sigma=next(S', id)
+}
+{<G, M, Q, S, \bullet > \ \ \reducesto \ \ <G, M, Q, S', \Sigma>}
+
+\smallskip
+The rule (GLOBAL SYNC) takes effect once all mutation openration is completed i.e. \emph{Q} is empty. The evaluation of this rule performs global synchronization of BSP model. If any vertex does not receive any message i.e. \emph{M(id) $\neq$ $\emptyset$} then the vertex state gets updated through \emph{$S'$}. Once the synchronization is done local configuration of each vertex gets updated to $\Sigma$.
+
 
