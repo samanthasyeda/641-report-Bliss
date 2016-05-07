@@ -128,11 +128,13 @@ The typing rules presented in this section are the standard ones. Note that the 
     {\Gamma, \Lambda, \Delta \vdash e_1~op~e_2 : T, \Lambda', \Delta}
 
 \smallskip
-    
+
 In the (ASSIGNMENT\_INT) type rule note that dependency of the expression $e$ is same as the variable $x$. In case of (CONDITIONAL), we simply update the dependency to $\Lambda'''$ from dependency of both branches i.e. $\Lambda'$ and $\Lambda''$. The type rule for (OPERATION) is similar to conditional where dependency environment is updated based on both expressions the op is performed.\\    
 
  \subsection{Typing Rules for Mutation Expressions}
 \label{subsec:standardRules}
+
+Typing rules for mutation expressions are more interesting compared to other expressions. There are four possible mutation expressions in a graph based framework. They are: vertex insertion, vertex removal, edge insertion and edge removal. 
 \ \\
 \ \\
 \inferrule[\small {(Vertex Insert)}]
@@ -144,7 +146,12 @@ In the (ASSIGNMENT\_INT) type rule note that dependency of the expression $e$ is
     \Delta' = (\psi, vInsert) \uplus \Delta
     }
     {\Gamma, \Lambda, \Delta \vdash vInsert \ e_1 \ e_2 :Bool, \Lambda, \Delta'}
-    
+
+\smallskip
+
+The rule (VERTEX INSERT) states that if a vertex insert mutation request is issued given a type environment where the vertex identifier $e_1$ is of type \emph{Int}, vertex value $e_2$ is of some type \emph{T}, the dependence environment maps the dependency of the vertex $e_1$ to be of type $\psi$ then it can be statically type checked as safe mutation if the new mutation is safe with respect to mutation environment $\Delta$ i.e. value of the vertex identifier does not depend on values stored in $\Lambda$. Then the type of this mutation is true and it updates the new mutation environment $\Delta'$ and false otherwise. It is possible to statically type check this rule only if stored mapping in $\Lambda$ are values.\\    
+\ \\
+\ \\    
 \inferrule[\small {(Vertex Remove)}]
     {
     \Gamma \vdash e_1 : Int\\
@@ -153,7 +160,12 @@ In the (ASSIGNMENT\_INT) type rule note that dependency of the expression $e$ is
     \Delta' = (\psi, vRemove) \uplus \Delta
     }
     {\Gamma, \Lambda, \Delta \vdash vRemove \ e_1 :Bool, \Lambda, \Delta'}
-    
+
+\smallskip
+
+In (VERTEX REMOVE) typing rule given a vertex removal mutation and a type environment where the vertex identifier $e_1$ is of type \emph{Int} and the dependence environment maps the dependency of the vertex $e_1$ to be of type $\psi$ then it can be a safe mutation if the new mutation is safe with respect to mutation environment $\Delta$ i.e. value of the vertex identifier does not depend on values stored in $\Lambda$. Then the type of this mutation is true and it updates the new mutation environment $\Delta'$ and false otherwise. Note that it may be possible $\Lambda$ contains dependency information such that another mutation requesting adding an edge to some vertex identifier stored as value is already considered as a safe mutation and added to the mutation environment $\Delta$. By this rule if the vertex removal request has the same identifier as the identifier value associated with former mutation stored in environment, then it is possible to disallow such mutations by the static type checking system.\\    
+\ \\
+\ \\         
 \inferrule[\small {(Edge Insert)}]
     {
     \Gamma \vdash e_1 : Int\\
@@ -167,14 +179,24 @@ In the (ASSIGNMENT\_INT) type rule note that dependency of the expression $e$ is
     }
     {\Gamma, \Lambda \Delta \vdash eInsert\ e_1\ e_2\ e_3 : Bool, \Lambda, \Delta'}
 
+\smallskip
+
+In the typing rule (EDGE INSERT) with an edge insert mutation and a type environment where the source vertex identifier $e_1$ is of type \emph{Int}, destination vertex identifier $e_2$ is of type \emph{Int}, edge value $e_3$ is of some type \emph{T} and the dependence environment maps the dependency of the vertex $e_1$ to be of type $\psi_1$ and vertex $e_2$ to be of $\psi_2$ then it can be a safe mutation if the new mutation is safe with respect to mutation environment $\Delta$ i.e. value of the both vertex identifiers do not depend on values stored in $\Lambda$. If this condition holds then the type of this mutation is true and it updates the mutation environment to $\Delta'$ and false otherwise.   
+\ \\
+\ \\ 
 \inferrule[\small {(Edge Remove)}]
     {
     \Gamma \vdash e_1 : Int\\
     \Gamma \vdash e_2 : Int\\
     }
     {\Gamma, \Lambda, \Delta \vdash eRemove\ e_1\ e_2 : Bool, \Lambda, \Delta}
-        
-    \inferrule[\small {(Sync)}]
+
+\smallskip
+
+The typing rule for (EDGE REMOVE) is more straight forward as removing edges concurrently does not create any conflict or result in erroneous graph. Hence the dependence environment $\Lambda$ and mutation environment $\Delta$ remains unchanged.\\
+\ \\
+\ \\         
+\inferrule[\small {(Sync)}]
     {\ \ }
     {\Gamma, \Lambda, \Delta \vdash sync : T, \Lambda, \Delta}
     
@@ -186,6 +208,10 @@ In the (ASSIGNMENT\_INT) type rule note that dependency of the expression $e$ is
     {\Gamma \vdash e_1 :Int}
     {\Gamma, \Lambda, \Delta \vdash send\ e_1\ e_2 : Bool, \Lambda, \Delta}
 
-{\bf TODO: present the new types, and the type rules here, and description of 
-these rules that focuses on the new and interesting rules.}
+ \smallskip
+
+The typing rules for synchronization, halting computation and sending messages between vertices are simple. The dependence environment and mutation environment do not get updated. Depending on the state of these operations typing environment $\Gamma$ is updated to indicate if a specific vertex is in sync state, halt state, and message is successfully sent to destination or not.\\
+\ \\
+\ \\    
+
 
