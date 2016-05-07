@@ -225,12 +225,12 @@ The rule (GLOBAL VREMOVE) is a bit interesting as before the removal of the vert
 \ \\
 \inferrule[\small {(Global eInsert)}]
 {
-E' = E \cup e_2
+E' = E \cup e_1
 }
 {<<V, E>, M, \mathscr{E}[eInsert\ e_1~e_2].Q, S, \bullet > \ \ \reducesto \ \ <<V, E'>, M, Q, S, \bullet >}
 
 \smallskip
-In the global edge insertion rule (GLOBAL EINSERT) naively inserts edge between source vertex \emph{$e_1$.fst} and destination vertex \emph{$e_1$.snd}. The list of edges \emph{E} gets updated to \emph{$E'$} such that \emph{$E'$ = E $\cup$ $e_2$}. The local configuration is empty like other global mutation rules.\\
+In the global edge insertion rule (GLOBAL EINSERT) naively inserts edge between source vertex \emph{$e_1$.fst} and destination vertex \emph{$e_1$.snd}. The list of edges \emph{E} gets updated to \emph{$E'$} such that \emph{$E'$ = E $\cup$ $e_1$}. The local configuration is empty like other global mutation rules.\\
 \ \\
 \ \\
 \inferrule[\small {(Global eRemove)}]
