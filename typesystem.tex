@@ -1,7 +1,183 @@
-\section{Type System}
+\section{A Type System with Safe Mutation}
 \label{sec:types}
 % More appropriate title for this section usually is "A Type System with Y"
 % where Y is the new feature introduced by your approach.
+
+We introduce two new types: vertex type and edge type. The standard arrow, pair, int, bool types are some other types in our type system. The type judgement expression consists of type environment, dependence environment, and mutation environment as shown in Figure \ref{fig-type}. Note that $\Gamma$ is a type environment mapping program variables to their annotated types; $\Lambda$ denotes the dependence environment, which stores the dependency information of a variable, i.e. a list of variables a variable depends upon before evaluation and $\Delta$ is used to denote the mutation environment that stores a mapping to dependent variables followed the mutation kind that may cause conflict associated with $\Gamma$. 
+
+\begin{figure}[h]
+\begin{center}
+$\begin{array}{@{}l@{~}l@{\quad}l@{\!\!\!\!\!\!}r}
+T &  ::= & \hspace{20mm} \emph{Type} \\
+&\ \ \ \   \ V(T) & \hspace{20mm} \emph{Vertex Type} \\
+&\ \ \ \   \mid~E(V(T),~V(T),~T) & \hspace{20mm} \emph{Edge Type} \\
+&\ \ \ \   \mid~T~\Rightarrow~T & \hspace{20mm} \emph{Arrow Type} \\
+&\ \ \ \   \mid~(T,~T) & \hspace{20mm} \emph{Pair Type} \\
+&\ \ \ \   \mid~Int  & \hspace{20mm} \emph{Integer Type} \\
+&\ \ \ \   \mid~Bool  & \hspace{20mm} \emph{Boolean Type} \\
+&\ \\
+&\ \\
+& \textbf{Type Judgement for expressions:}
+&\ \\
+&\ \\
+& \Gamma,~\Lambda,~\Delta~\vdash~e : T,~\Lambda,~\Delta \ \ \ \ \  where \\ 
+&\ \\
+& \Gamma ::= {\{ I : T_I \}}_{I \in K} & \hspace{20mm} \emph{Type Environment} \\
+& \ \ \ \ \ \ \ \ where~K~is~finite \\
+& \Lambda ::= {\{ x: \psi_x \}}_{x \in K} & \hspace{20mm} \emph{Dependence Environment} \\
+& \ \ \ \ \ \ \ \ where~K~is~finite \\
+& \psi ::= \psi ;x~\mid~\bullet & \hspace{20mm} \emph{Mutation Dependence Type} \\
+& \Delta ::= \emptyset~\mid~\Delta; (\psi,~KIND); & \hspace{20mm} \emph{Mutation Environment} \\
+& KIND \in \{vInsert,~vRemove,~eInsert\} & \hspace{20mm} \emph{Mutation Kinds} \\
+\end{array}
+$
+
+\end{center}
+\caption{Types and Type Environments.}
+\label{fig-type}
+\end{figure}
+
+\subsection{Safe Mutation Check}
+\label{subsec:safeMute}
+
+The general intuition to confirm a mutation is safe i.e. conflict free is checking values of the variables in consideration and the dependency it may have on other variables. The vertices in the graph has unique identifiers. Variables have same value for every vertex unless they depend on some values that differ from vertices e.g. vertex identifier, vertex value, edge list and associated edge value. Depending on these kind of information, variables are marked with dependencies. Our current type system only keeps track of the dependency of variables, and assume that the value are the same if the dependency set is the same. Potential conflict combinations are identified as multiple vertex insertion, a vertex removal and an edge insertion issued concurrently.
+\ \\
+\ \\
+\inferrule[\small {(Safe)}]
+    {
+    (KIND=vInsert~\wedge~(\nexists (\psi', vInsert) \in \Delta, \psi=\psi')~\wedge~\psi\neq \bullet )~~\vee\ \\\\
+    (KIND=eInsert~\wedge~\nexists (\psi', vRemove) \in \Delta, \psi=\psi')~~\vee\ \\\\
+    (KIND=vRemove~\wedge~\nexists (\psi', eInsert) \in \Delta, \psi=\psi')
+    }
+    {(\psi , KIND)~\#~\Delta }
+
+\smallskip
+
+Statically our type system checks whether two mutation expressions $e_1$ and $e_2$ happening concurrently is mutation safe ($e_1$~\#~$e_2$) or unknown at that point. The cases where it can not be known statically a runtime check is performed.
+
+The rule (SAFE) states that to be mutation conflict safe if two vertex insert with same identifier value or vertex remove with some identifier value and an edge insertion to the vertex not with the same value and vice versa are issued parallely. 
+
+\subsection{Typing Rules for Standard Expressions}
+\label{subsec:standardRules}
+\ \\
+\ \\
+\inferrule[\small {(Variable)}]
+    {
+    \Gamma \vdash x:T\\
+    \Lambda' \vdash x:x
+    }
+    {\Gamma, \Lambda, \Delta \vdash x:T, \Lambda, \Delta}
+
+\inferrule[\small {(Value)}]
+    {\ \ }
+    {\Gamma, \Lambda, \Delta \vdash v:T, \Lambda, \Delta}
+
+\inferrule[\small {(Assignment\_Int)}]
+    {
+     \Gamma \vdash e:Int\\
+     \Gamma \vdash x:Int\\\\
+     \Lambda \vdash e:\psi\\
+     \Lambda' \vdash  x:\psi
+     }
+    {
+    	\Gamma, \Lambda, \Delta \vdash x:=e : T, \Lambda ', \Delta
+    }
+    
+\inferrule[\small {(Conditional)}]
+    {
+     \Gamma \vdash e_1 : Bool\\
+     \Gamma, \Lambda, \Delta \vdash e_2 :T, \Lambda ', \Delta\\
+     \Gamma, \Lambda, \Delta \vdash e_3 :T, \Lambda '', \Delta\\
+  	 \Lambda ''' = \Lambda ' \uplus \Lambda ''
+    }
+    {\Gamma, \Lambda, \Delta \vdash if\ e_1 \ then\ e_2 \ else\ e_3 :T, \Lambda ''', \Delta}
+
+	\inferrule[\small {(While)}]
+    {
+     \Gamma \vdash e_1:Bool\\
+     \Gamma, \Lambda, \Delta\vdash e_2:T, \Lambda', \Delta
+    }
+    {\Gamma, \Lambda, \Delta \vdash while\ e_1\ e_2:T,\Lambda', \Delta}
+
+
+	\inferrule[\small {(Lambda)}]
+    {
+     \Gamma \vdash x: T_1\\
+     \Gamma[x/T_1] \vdash e: T_2}
+    {\Gamma, \Lambda, \Delta \vdash \lambda x.e: T_1 \rightarrow T_2, \Lambda, \Delta}
+    
+    \inferrule[\small {(Application)}]
+    {
+     \Gamma \vdash e_1 : T_1 \rightarrow T_2\\
+     \Gamma, \Lambda, \Delta \vdash e_2 : T_1, \Lambda', \Delta\\
+     \Gamma, \Lambda', \Delta \vdash e_1 : T_1, \Lambda'', \Delta
+     }
+    {\Gamma, \Lambda, \Delta \vdash e_1 \ e_2 : T_2 , \Lambda'', \Delta}
+    
+    \inferrule[\small {(Operation)}]
+    {
+     \Gamma \vdash e_1 : T\\
+     \Gamma \vdash e_2 : T\\
+     \Lambda \vdash e_1 : \psi_1\\
+     \Lambda \vdash e_1 : \psi_2\\
+     \Lambda' = \Lambda \uplus \psi_1 \uplus \psi_2
+     }
+    {\Gamma, \Lambda, \Delta \vdash e_1~op~e_2 : T, \Lambda', \Delta}  
+
+ \subsection{Typing Rules for Mutation Expressions}
+\label{subsec:standardRules}
+\ \\
+\ \\
+\inferrule[\small {(Vertex Insert)}]
+    {
+    \Gamma \vdash e_1 : Int\\
+    \Gamma \vdash e_2 : T\\
+    \Lambda \vdash e_1 : \psi\\
+    \psi \# \Delta\\
+    \Delta' = (\psi, vInsert) \uplus \Delta
+    }
+    {\Gamma, \Lambda, \Delta \vdash vInsert \ e_1 \ e_2 :Bool, \Lambda, \Delta'}
+    
+\inferrule[\small {(Vertex Remove)}]
+    {
+    \Gamma \vdash e_1 : Int\\
+    \Lambda \vdash e_1 : \psi\\
+    \psi \# \Delta\\
+    \Delta' = (\psi, vRemove) \uplus \Delta
+    }
+    {\Gamma, \Lambda, \Delta \vdash vRemove \ e_1 :Bool, \Lambda, \Delta'}
+    
+\inferrule[\small {(Edge Insert)}]
+    {
+    \Gamma \vdash e_1 : Int\\
+    \Gamma \vdash e_2 : Int\\
+    \Gamma \vdash e_3 : T\\ 
+    \Lambda \vdash e_1 : \psi_1\\
+    \Lambda \vdash e_2 : \psi_2\\
+    \psi_1 \# \Delta\\
+    \psi_2 \# \Delta\\
+    \Delta' = (\psi_1, eInsert) \uplus (\psi_2, eInsert) \uplus \Delta
+    }
+    {\Gamma, \Lambda \Delta \vdash eInsert\ e_1\ e_2\ e_3 : Bool, \Lambda, \Delta'}
+
+\inferrule[\small {(Edge Remove)}]
+    {
+    \Gamma \vdash e_1 : Int\\
+    \Gamma \vdash e_2 : Int\\
+    }
+    {\Gamma, \Lambda, \Delta \vdash eRemove\ e_1\ e_2 : Bool, \Lambda, \Delta}
+        
+    \inferrule[\small {(Sync)}]
+    {\ \ }
+    {\Gamma, \Lambda, \Delta \vdash sync : T, \Lambda, \Delta}
+    
+    \inferrule[\small {(Halt)}]
+    {\ \ }
+    {\Gamma, \Lambda, \Delta \vdash halt : T, \Lambda, \Delta}
+    
+    \inferrule[\small {(Send Message)}]
+    {\Gamma \vdash e_1 :Int}
+    {\Gamma, \Lambda, \Delta \vdash send\ e_1\ e_2 : Bool, \Lambda, \Delta}
 
 {\bf TODO: present the new types, and the type rules here, and description of 
 these rules that focuses on the new and interesting rules.}
