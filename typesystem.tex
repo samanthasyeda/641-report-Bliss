@@ -55,10 +55,12 @@ The general intuition to confirm a mutation is safe i.e. conflict free is checki
 
 Statically our type system checks whether two mutation expressions $e_1$ and $e_2$ happening concurrently is mutation safe ($e_1$~\#~$e_2$) or unknown at that point. The cases where it can not be known statically a runtime check is performed.
 
-The rule (SAFE) states that to be mutation conflict safe if two vertex insert with same identifier value or vertex remove with some identifier value and an edge insertion to the vertex not with the same value and vice versa are issued parallely. 
+The rule (SAFE) states that to be mutation conflict safe if two vertex insert with same identifier value or vertex remove with some identifier value and an edge insertion to the vertex not with the same identifier value and vice versa are issued parallely. 
 
 \subsection{Typing Rules for Standard Expressions}
 \label{subsec:standardRules}
+
+The typing rules presented in this section are the standard ones. Note that the mutation environment $\Delta$ do not change in any of the standard expressions. This is because we only update mutation environment when a mutation request occurs. However we update the dependency environment when a variable is concerned. 
 \ \\
 \ \\
 \inferrule[\small {(Variable)}]
@@ -66,7 +68,7 @@ The rule (SAFE) states that to be mutation conflict safe if two vertex insert wi
     \Gamma \vdash x:T\\
     \Lambda' \vdash x:x
     }
-    {\Gamma, \Lambda, \Delta \vdash x:T, \Lambda, \Delta}
+    {\Gamma, \Lambda, \Delta \vdash x:T, \Lambda', \Delta}   
 
 \inferrule[\small {(Value)}]
     {\ \ }
@@ -82,7 +84,7 @@ The rule (SAFE) states that to be mutation conflict safe if two vertex insert wi
     {
     	\Gamma, \Lambda, \Delta \vdash x:=e : T, \Lambda ', \Delta
     }
-    
+   
 \inferrule[\small {(Conditional)}]
     {
      \Gamma \vdash e_1 : Bool\\
@@ -92,7 +94,8 @@ The rule (SAFE) states that to be mutation conflict safe if two vertex insert wi
     }
     {\Gamma, \Lambda, \Delta \vdash if\ e_1 \ then\ e_2 \ else\ e_3 :T, \Lambda ''', \Delta}
 
-	\inferrule[\small {(While)}]
+
+\inferrule[\small {(While)}]
     {
      \Gamma \vdash e_1:Bool\\
      \Gamma, \Lambda, \Delta\vdash e_2:T, \Lambda', \Delta
@@ -100,13 +103,13 @@ The rule (SAFE) states that to be mutation conflict safe if two vertex insert wi
     {\Gamma, \Lambda, \Delta \vdash while\ e_1\ e_2:T,\Lambda', \Delta}
 
 
-	\inferrule[\small {(Lambda)}]
+\inferrule[\small {(Lambda)}]
     {
      \Gamma \vdash x: T_1\\
      \Gamma[x/T_1] \vdash e: T_2}
     {\Gamma, \Lambda, \Delta \vdash \lambda x.e: T_1 \rightarrow T_2, \Lambda, \Delta}
     
-    \inferrule[\small {(Application)}]
+ \inferrule[\small {(Application)}]
     {
      \Gamma \vdash e_1 : T_1 \rightarrow T_2\\
      \Gamma, \Lambda, \Delta \vdash e_2 : T_1, \Lambda', \Delta\\
@@ -114,7 +117,7 @@ The rule (SAFE) states that to be mutation conflict safe if two vertex insert wi
      }
     {\Gamma, \Lambda, \Delta \vdash e_1 \ e_2 : T_2 , \Lambda'', \Delta}
     
-    \inferrule[\small {(Operation)}]
+ \inferrule[\small {(Operation)}]
     {
      \Gamma \vdash e_1 : T\\
      \Gamma \vdash e_2 : T\\
@@ -122,7 +125,11 @@ The rule (SAFE) states that to be mutation conflict safe if two vertex insert wi
      \Lambda \vdash e_1 : \psi_2\\
      \Lambda' = \Lambda \uplus \psi_1 \uplus \psi_2
      }
-    {\Gamma, \Lambda, \Delta \vdash e_1~op~e_2 : T, \Lambda', \Delta}  
+    {\Gamma, \Lambda, \Delta \vdash e_1~op~e_2 : T, \Lambda', \Delta}
+
+\smallskip
+    
+In the (ASSIGNMENT\_INT) type rule note that dependency of the expression $e$ is same as the variable $x$. In case of (CONDITIONAL), we simply update the dependency to $\Lambda'''$ from dependency of both branches i.e. $\Lambda'$ and $\Lambda''$. The type rule for (OPERATION) is similar to conditional where dependency environment is updated based on both expressions the op is performed.\\    
 
  \subsection{Typing Rules for Mutation Expressions}
 \label{subsec:standardRules}
