@@ -1,6 +1,28 @@
 \section{Related Work}
 \label{sec:related}
+In early works on garbage collecting, Dijkstra \textit{et
+al.}~\cite{dijkstra1978} has presented a graph marking algorithm that tranverses
+computational graphs to discover the connectivity of the graph. One aspect of
+these graph marking algorithms is that the connectivity of the computational
+graph is constantly changing. A question that naturally rises is what graph
+mutations can work execute concurrently with the marking process. In Dijkstra's
+work, a sequential mutator running in parallel with a sequential garbage
+collector has been shown to have to cooperate with each other to not invalidate
+the marking process. In Hudak's work~\cite{Hudak:1983}
+of garbage collecting in distrubuted computing systems, the problem has
+been expanded to parallel mutators with parallel garbage collectors. Hudak
+introduced a subset of mutation primitives and have shown that the basic set of
+mutation primitives can cover most of the common mutations of a computational
+graph, which can be accomodated with the garbage collector.
 
-{\bf TODO: Present related work here.}
+Strecker's attempt of formalizing graph
+transformations~\cite{strecker2008modeling}, presented a more expressive set of 
+operations for structural mutation of graphs. They have explored and defined the
+applicability of graph transformations such that applying a well-formed graph
+transformation on well-formed graphs can result in well-formed graphs. Our work
+uses a similar approach to model the graph mutations of a graph, and
+solves the problem of conflictions where a well-formed graph can not be derived
+from a set of mutations.
+
 
 

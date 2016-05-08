@@ -3,7 +3,16 @@
 % More appropriate title for this section usually is "A Type System with Y"
 % where Y is the new feature introduced by your approach.
 
-We introduce two new types: vertex type and edge type. The standard arrow, pair, int, bool types are some other types in our type system. The type judgement expression consists of type environment, dependence environment, and mutation environment as shown in Figure \ref{fig-type}. Note that $\Gamma$ is a type environment mapping program variables to their annotated types; $\Lambda$ denotes the dependence environment, which stores the dependency information of a variable, i.e. a list of variables a variable depends upon before evaluation and $\Delta$ is used to denote the mutation environment that stores a mapping to dependent variables followed the mutation kind that may cause conflict associated with $\Gamma$. 
+We introduce two new types: vertex type and edge type along with the
+arrow, pair, int, and bool types in our type system.
+We defined a type judgement expression consisting the type environment,
+dependence environment, and the mutation environment as shown in Figure
+\ref{fig-type}. The type enviroment $\Gamma$ maps
+program variables to their annotated types; $\Lambda$ denotes the dependence
+environment, which stores the dependency information of a variable, i.e. a list
+of variables a variable depends upon before evaluation and $\Delta$ is used to
+denote the mutation environment that stores a mapping to dependent variables
+followed the mutation kind that may cause conflict associated with $\Gamma$.
 
 \begin{figure}[h]
 \begin{center}
@@ -40,7 +49,17 @@ $
 \subsection{Safe Mutation Check}
 \label{subsec:safeMute}
 
-The general intuition to confirm a mutation is safe i.e. conflict free is checking values of the variables in consideration and the dependency it may have on other variables. The vertices in the graph has unique identifiers. Variables have same value for every vertex unless they depend on some values that differ from vertices e.g. vertex identifier, vertex value, edge list and associated edge value. Depending on these kind of information, variables are marked with dependencies. Our current type system only keeps track of the dependency of variables, and assume that the value are the same if the dependency set is the same. Potential conflict combinations are identified as multiple vertex insertion, a vertex removal and an edge insertion issued concurrently.
+To determine the safeness of a mutation, we follow the intuition of that we can
+determine if conflicts exist between a pair of mutations by checking the values
+of variables, and the dependency it may have on other variables. The vertices in
+the graph has unique identifiers. Variables have same value for every vertex
+unless they depend on some values that differ from vertices e.g. vertex
+identifier, vertex value, edge list and associated edge value. Depending on
+these information, variables are marked with dependencies. Our current type
+system only keeps track of the dependency of variables, and assume that the
+value are the same if the dependency set is the same. Potential conflict
+combinations are identified as multiple vertex insertion, a vertex removal and
+an edge insertion issued concurrently.
 \ \\
 \ \\
 \inferrule[\small {(Safe)}]
@@ -210,7 +229,12 @@ The typing rule for (EDGE REMOVE) is more straight forward as removing edges con
 
  \smallskip
 
-The typing rules for synchronization, halting computation and sending messages between vertices are simple. The dependence environment and mutation environment do not get updated. Depending on the state of these operations typing environment $\Gamma$ is updated to indicate if a specific vertex is in sync state, halt state, and message is successfully sent to destination or not.\\
+The typing rules for synchronization, halting computation and sending messages
+between vertices are simple. The dependence environment and mutation environment
+do not get updated. Depending on the state of these operations typing
+environment $\Gamma$ is updated to indicate if a specific vertex is in sync
+state, halt state, and if the message is successfully sent to its destination or
+not.\\
 \ \\
 \ \\    
 
