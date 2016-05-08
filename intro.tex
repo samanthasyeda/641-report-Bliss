@@ -1,21 +1,29 @@
 \section{Introduction}
 \label{sec:intro}
 
-{\bf TODO: }
+Graphs are becoming very widely deployed in a host of different industries and research directions. Efficient processing of large scale graph related problems such as social networking, webgraph etc. poses a crucial challenge \cite{Pregel2010}. One way to tackle these type of graphs can be using existing distributed computing system, however doing so can lead to suboptimal performance and usability issues. Large scale graph computing problems has motivated researchers to introduce frameworks \cite{Pregel2010,Graphlab2012,Zuhair:Mizan,GPS2013} that can facilitate parallel processing to enable effective and efficient processing time. Some of these graphs frameworks are inspired by Valiant's Bulk Synchronous Parallel model (Pregel, Giraph). This model enables parallel computation and provides facilities for synchronizing all or a subset of the components at regular intervals known as superstep \cite{Valiant1990}. Although some graph algorithms can be successfully realized through vertex-centric (parallel) approach, some require global (sequential) execution or a combination of both. A generalized framework for graph processing needs to provide the facility to concretize all types of graph computations. The algorithms that requires a combination of vertex-centric and global execution allows graph mutations. Parallel execution of the algorithm to achieve efficiency and proper synchronization to avoid conflicts in resulting graph is of utmost importance.
 
-Appropriate references should be cited, e.g. 
-\cite{DeanGhemawat2008}. 
+
+To enable parallel execution, graph processing frameworks lets the computation run on the vertex level of the graph. Active vertices run the computation and can send message to other vertices if needed. A notion of superstep is used to synchronize the computations and start the next step where vertex programs can again run concurrently. Graph topology mutation in these frameworks can be of the form: removing a vertex/edge component that exists in the graph, or adding a new component. It is apparent when a framework allows graph mutations as a part of the computation and several computations are running parallely, different vertices can conflict with each other at the same superstep e.g. two vertices wants to add a vertex to the existing graph with different intial value. It is possible that resulting graph may be error-prone or non-deterministic. Pregel \cite{Pregel2010} addresses this problem and uses to provide non-deterministic result partial ordering and handler.
+
+
+Partial ordering states that within a same superstep removal requests happen before the new additions. Edge removal mutation is executed before vertex removal mutation and justifies the fact that removing a vertex is enough to implicitly remove its outgoing edges. After the mutation of type removing a component, addition takes place. Vertex insertion is followed by the edge insertion. However this partial ordering is not enough to provide deterministic results. The mutation of same type creating a conflict can not be solved by partial ordering. Even if the mutations are of different types e.g. vertex removal and edge insertion, it is still possible to get an incorrect output. Nevertheless it can be argued that providing handler mechanisms can mitigate this problem. The main problem here is that the framework in that case will be depending too much on the user knowledge to detect all possible conflicts and produce correct result. Depending on the user on such issues can increase the barrier to entry and it is not always the case that user assumption concurs to the output of the program.
+
+
+We put forth a new approach to reduce the gap between the barrier to entry and correctness of final output graph. Our hybrid system statically type checks to detect the possible conflicts happening at the same superstep. If the effect of two or more mutations running parallely cannot be known statically then the dynamic operational semantics checks the possibility at runtime and disallow the conflicting mutations. 
+
 
 
 \subsection{Contributions}
 \label{subsec:contrib}
 
+First author has worked in searching for possible problems, presenting the core language, some of the typing rules, and auxiliary functions needed for dynamic semantics. Second author has worked in writing rest of the typing rules, formalizing the dynamic semantics, also going through overall work and edit the versions when necessary. First author has written the report but \secref{sec:soundness}, \secref{sec:related} and future works where the second author has contributed. The third author has worked in looking for possible problems and implementing our approach.
 
 
 \subsection{Outline}
 \label{subsec:outline}
 
-Rest of the paper is organized as follows.
+Rest of the paper is organized as follows. \secref{sec:motivation} presents two motivating examples that can cause non-determinism or error-prone results that can not be solved by the existing approaches. \secref{sec:syntax} describes a core language expressive enough to denote the basic mutations, synchronization and message passing between vertices in a graph based framework. \secref{sec:types} describes a static type based system to track the dependency between vertices and type check possible conflicts at that point. \secref{sec:semantics} provides the dynamic semantics that detects the conflicts that cannot be checked statically. \secref{sec:soundness} outlines a set of properties to verify the soundness of the approach. Related works are presented in \secref{sec:related}, followed by our future work and conclusion in \secref{sec:conclusion}.
 
 
 

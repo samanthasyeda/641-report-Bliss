@@ -41,8 +41,6 @@ A typical type system may disallow the concurrent execution of all or most of th
 \subsection{Example 2: Vertex Insertion Ambiguity}
 \label{subsec:example2}
 
-The second example we demonstrate another compute function running at each active vertex given a specific superstep. It is crucial to note that the values associated with the vertex and its edges are the only per-vertex state that persists across supersteps \cite{Pregel2010}. This indicates although identifiers of vertices are unique to itself, values are mutable. In Figure \ref{fig:vInsert} each vertex running the compute function on lines 4-12 issues a vertex insertion request with a specific value at first superstep. Final superstep is again naive in a sense as all vertices simply vote to halt in this.
-
 
 \begin{figure}[h]
 \begin{center}
@@ -65,6 +63,8 @@ The second example we demonstrate another compute function running at each activ
 \label{fig:vInsert}
 \end{figure}
 
+
+The second example we demonstrate another compute function running at each active vertex given a specific superstep. It is crucial to note that the values associated with the vertex and its edges are the only per-vertex state that persists across supersteps \cite{Pregel2010}. This indicates although identifiers of vertices are unique to itself, values are mutable. In Figure \ref{fig:vInsert} each vertex running the compute function on lines 4-12 issues a vertex insertion request with a specific value at first superstep. Final superstep is again naive in a sense as all vertices simply vote to halt in this.
 
 In this example we concentrate once more on a scenario where another type of conflict occurs to motivate the importance of detecting such cases rather than presenting with a safe concurrent program. To illustrate with Figure \ref{fig:vInsert}, consider there are three active vertices at the superstep 0 and identified by 0, 1 and 2 respectively. All vertices (vertex 0, 1 and 2) issues a vertex addition request with the same identifier 3, but associates a different value along with it. As identifiers are unique only one request will be considered. However this creates a conflict and can produce non-deterministic result which may or may not be what user intended. 
 
