@@ -1,11 +1,13 @@
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
+\subsection{Future Work}
+
 The future work on our proposed type system will focus on the improvement of the
 completeness of the type checking, and increasing the range of problems that can
 be solved.
 
-\subsection{Completeness Improvement}
+\subsubsection{Completeness Improvement:}
 Our type system identify dependency of variables, by tracking the set of
 variables the value of a variable depends on. Currently, we
 assume that variables with the same set of dependency will have the same value,
@@ -13,12 +15,12 @@ while other cases are left until run-time to check using the run-time value. In
 many cases, the value of the variable can be determined more precisely.
 Another promising direction is to use the means of symbolic
 execution~\cite{king1976}, where we can determine the range of vertex and edge
-values that can cause confliction of mutation.
+values that can cause conflict due to mutation.
 
-\subsection{Further Expanding the Solution}
-The current type system solves a class of problems of concurrent graph mutation,
+\subsubsection{Further Expanding the Solution:}
+The current type system solves a class of problems of concurrent graph mutations,
 where concurrent mutation requests can conflict with each other causing
-indeterministic results or ill-formed graphs, as described in \secref{sec:motivation}. 
+non-deterministic results or ill-formed graphs, as described in \secref{sec:motivation}. 
 
 There are other classes of problems raised by concurrent execution of graph
 mutation that is not covered by the solution proposed in this work. Consider an
@@ -26,8 +28,10 @@ algorithm where edges are added to vertices only if the out degree of a vertex
 is smaller than n. Multiple attempt to add edges to a same vertex from
 different vertex can be issued in the same superstep. Even though the mutation
 request does not conflict with each other, the resulting graph can violate the
-desired graph property. These class of problems might be able to be solved by
+desired graph property. These classes of problems might be able to be solved by
 expanding the expressiveness of the language to specify desired graph
 properties.
 
 \subsection{Conclusion}
+
+The contribution of this paper is presenting a hybrid safe mutation check model for large scale graph computing that allows parallel graph mutation. Our static type checking system can type check safe mutation operations happening concurrently if the vertex identifier values and the set of dependency are known at that point. The dynamic semantics disallow the unsafe concurrent mutation operations if these can not be type checked statically. We have also implemented a prototype type checker to confirm the practicality of our approach. We envision that our approach extended with a type system that covers a wider class of problems can verify the well-formedness of graph related problems that provides the opportunity of safe graph mutation concurrently.  
