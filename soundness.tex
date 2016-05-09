@@ -1,10 +1,13 @@
 \section{Meta-theory}
 \label{sec:soundness}
 
-This section proves the formal properties of Y. % Here, Y is the name of your calculus.
-We first show the standard soundness property. 
-Next, we prove P1. Then, we prove P2. % Here, P1 and P2 are properties specific to your calculus.
-
-{\bf TODO: present theorem and prove soundness. Present theorems and prove P1 and P2}
+This section proves the formal properties of our core language. We first show the standard soundness property. Next, we talk about well formed mutation property of graph. The graphs our language supports are directed typed graphs. These graphs contain nodes and edges, and these represent the instances of node and edge types.\\
+\ \\ 
+\textbf{Definition 1 (Graph)} Let G = <V, E> be a graph with set of vertices V and set of edges E.\\
+\ \\
+\textbf{Definition 2 (Graph Mutation)} Let $G$ = <$V$, $E$>  and $G'$ = <$V'$, $E'$> be two graphs, then a graph mutation t: $G$ $\Rightarrow$ $G'$ consists of a pair mappings <$t_v$, $t_e$> with $t_v$: $V$ $\Rightarrow$ $V'$ and $t_e$: $E$ $\Rightarrow$ $E'$.\ \\
+\ \\
+\ \\
+\textbf{Theorem 1} Application of conflict safe mutations to well-formed graphs yields well-formed graphs.\\
 
 
